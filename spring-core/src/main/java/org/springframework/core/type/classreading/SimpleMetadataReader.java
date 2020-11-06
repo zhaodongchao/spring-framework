@@ -16,15 +16,15 @@
 
 package org.springframework.core.type.classreading;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.springframework.asm.ClassReader;
 import org.springframework.core.NestedIOException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * {@link MetadataReader} implementation based on an ASM
@@ -51,14 +51,19 @@ final class SimpleMetadataReader implements MetadataReader {
 		this.annotationMetadata = visitor.getMetadata();
 	}
 
+	/**
+	 * 通过class文件的Resource来获取一个对应的CLassReader实例。Class
+	 *
+	 * @param resource class文件对应的Resource对象实例
+	 * @return ClassReader 用于读取class文件结构的一个工具类
+	 * @throws IOException io异常
+	 */
 	private static ClassReader getClassReader(Resource resource) throws IOException {
 		try (InputStream is = resource.getInputStream()) {
 			try {
 				return new ClassReader(is);
-			}
-			catch (IllegalArgumentException ex) {
-				throw new NestedIOException("ASM ClassReader failed to parse class file - " +
-						"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
+			} catch (IllegalArgumentException ex) {
+				throw new NestedIOException("ASM ClassReader failed to parse class file - probably due to a new Java class file version that isn't supported yet: " + resource, ex);
 			}
 		}
 	}

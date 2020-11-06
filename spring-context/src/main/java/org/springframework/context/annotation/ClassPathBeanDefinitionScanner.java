@@ -249,15 +249,16 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return number of beans registered
 	 */
 	public int scan(String... basePackages) {
+		//获取在扫描包之前，已经注册到容器中的beanDefinition的总数
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
-
+        //扫描制定包下面的class文件，获取对应的BeanDefinition
 		doScan(basePackages);
 
 		// Register annotation config processors, if necessary.
 		if (this.includeAnnotationConfig) {
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
-
+        //返回本次扫描到的合法的BeanDefinition的个数
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
@@ -272,23 +273,34 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+		//遍历指定的包
 		for (String basePackage : basePackages) {
+			//从包中找到所有可以被实例化且满足过滤条件的class的BeanDefinition集合
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			//便利bean定义
 			for (BeanDefinition candidate : candidates) {
+				//获取bean的scope ,singleton或者prototype ，或者自定义的scope
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+				//使用AnnotationBeanNameGenerator生成这个bean的名称
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
+					//如果这个beanDefinition是AbstractBeanDefinition的子类，就给予相应默认的bean定义
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
+                    //如果这个class是一个注解类，就解析注解类的5个通用注解(@Lazy @DependsOn @Primary @Role @Description)信息到AnnotatedBeanDefinition中
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				//判断这个BeanDefinition是否已经存在于BeanFactory实例中
 				if (checkCandidate(beanName, candidate)) {
+					//使用这个bean的定义和beanName构建一个新的BeanDefinition容器
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-					definitionHolder =
-							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					//根据class的Scope来对其bean定义进行相应的处理，代理或者非代理
+					definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					//将最终的BeanDefinition存入集合中返回。
 					beanDefinitions.add(definitionHolder);
+					//将最终的BeanDefinition注册（存入）到BeanFactory实例的bean定义相关缓存中
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}

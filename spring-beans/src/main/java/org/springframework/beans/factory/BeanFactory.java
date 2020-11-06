@@ -63,6 +63,8 @@ import org.springframework.lang.Nullable;
  * {@link HierarchicalBeanFactory}. If a bean is not found in this factory instance,
  * the immediate parent factory will be asked. Beans in this factory instance
  * are supposed to override beans of the same name in any parent factory.
+ * 查找一个bean时，如果在这个BeanFactory实例中存在，就会使用本实例中的。 如果不存在，再会去查找它的父BeanFactory
+ * 因此。 子BeanFactory中的bean会覆盖所有父BeanFactory中同名的bean
  *
  * <p>Bean factory implementations should support the standard bean lifecycle interfaces
  * as far as possible. The full set of initialization methods and their standard order is:

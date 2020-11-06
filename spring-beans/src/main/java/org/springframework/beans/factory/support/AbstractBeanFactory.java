@@ -101,14 +101,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 	/**
 	 * Names of beans that have already been created at least once.
+	 * 存放准备创建的bean的名称，此时bean还没有没实例化
 	 */
 	private final Set<String> alreadyCreated = Collections.newSetFromMap(new ConcurrentHashMap<>(256));
 	/**
 	 * Names of beans that are currently in creation.
 	 * 存放正在创建的原型模式的bean的名称
 	 */
-	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
-			new NamedThreadLocal<>("Prototype beans currently in creation");
+	private final ThreadLocal<Object> prototypesCurrentlyInCreation = new NamedThreadLocal<>("Prototype beans currently in creation");
 	/**
 	 * Parent bean factory, for bean inheritance support.
 	 */

@@ -42,6 +42,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
+ * 一个用于识别@Configuration配置类的工具
+ *
  * Utilities for identifying {@link Configuration} classes.
  *
  * @author Chris Beams

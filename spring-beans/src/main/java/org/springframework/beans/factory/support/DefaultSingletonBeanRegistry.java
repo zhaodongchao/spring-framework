@@ -68,18 +68,23 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Cache of singleton objects: bean name to bean instance.
+	 *
+	 * 一级缓存 存放bean实例的完整对象， 完全实例化完成的bean实例
 	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/**
-	 * Cache of singleton factories: bean name to ObjectFactory.
-	 */
-	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
-
-	/**
 	 * Cache of early singleton objects: bean name to bean instance.
+	 * 二级缓存 存放实例化后未初始化完成的对象
+	 *  key = beanName value=Bean实例半成品 （已经实例化，但是未初始化完成的对象）
 	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
+
+	/**
+	 * Cache of singleton factories: bean name to ObjectFactory.
+	 * 三级缓存
+	 */
+	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/**
 	 * Set of registered singletons, containing the bean names in registration order.
@@ -193,8 +198,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
+		//从1级缓存中获取
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			//取二级缓存中查找
 			singletonObject = this.earlySingletonObjects.get(beanName);
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
@@ -206,7 +213,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
+								//存入二级缓存
 								this.earlySingletonObjects.put(beanName, singletonObject);
+								//从三级缓存中移除
 								this.singletonFactories.remove(beanName);
 							}
 						}
